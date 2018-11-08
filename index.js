@@ -1,6 +1,14 @@
 'use strict'
 
 const Hapi = require('hapi');
+const MongoClient = require('mongodb').MongoClient;
+const url = "mongodb://localhost:27017/tododb";
+
+MongoClient.connect(url, (err, db) => {
+  if (err) throw err;
+  console.log("Database created!");
+  db.close();
+});
 
 const server = Hapi.server({
   port: 3000,
