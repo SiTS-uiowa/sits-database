@@ -2,12 +2,30 @@
 
 const Hapi = require('hapi');
 const MongoClient = require('mongodb').MongoClient;
-const url = "mongodb://localhost:27017/tododb";
+const url = "mongodb://localhost:27017/";
 
 MongoClient.connect(url, (err, db) => {
   if (err) throw err;
-  console.log("Database created!");
-  db.close();
+  console.log("Database connected!");
+
+  const dbo = db.db('tododb');
+
+  dbo.createCollection('todos', (err, res) => {
+    if (err) throw err;
+    console.log("Collection created");
+
+    const todos = [
+      { name: "Take out trash", checked: false },
+      { name: "Impeach Tanner", checked: false },
+      { name: "Pass all classes, ever", checked: false },
+    ];
+
+    dbo.collection("todos").insertMany(todos, (err, res) => {
+      if (err) throw err;
+      console.log(`Number of documents inserted: ${res.insertedCount}`);
+      db.close();
+    });
+  });
 });
 
 const server = Hapi.server({
