@@ -1,32 +1,15 @@
 'use strict'
 
 const Hapi = require('hapi');
-const MongoClient = require('mongodb').MongoClient;
-const url = "mongodb://localhost:27017/";
+const mongoose = require('mongoose');
+const Todo = require('./models/todo');
 
-MongoClient.connect(url, (err, db) => {
-  if (err) throw err;
-  console.log("Database connected!");
+const url = "mongodb://localhost:27017/tododb";
 
-  const dbo = db.db('tododb');
-
-  dbo.createCollection('todos', (err, res) => {
-    if (err) throw err;
-    console.log("Collection created");
-
-    const todos = [
-      { name: "Take out trash", checked: false },
-      { name: "Impeach Tanner", checked: false },
-      { name: "Pass all classes, ever", checked: false },
-    ];
-
-    dbo.collection("todos").insertMany(todos, (err, res) => {
-      if (err) throw err;
-      console.log(`Number of documents inserted: ${res.insertedCount}`);
-      db.close();
-    });
-  });
-});
+mongoose.connect(url);
+mongoose.connection.once('open', () => {
+  console.log('connected to database');
+})
 
 const server = Hapi.server({
   port: 3000,
@@ -45,7 +28,12 @@ server.route({
   method: 'POST',
   path: '/',
   handler: (request, h) => {
-    // TODO: create a TODO with a name and 'checked' value
+    const { name, checked } = request.payload;
+    const newTodo = new Todo({
+      name,
+      checked,
+    });
+    return newTodo.save();
   }
 })
 
