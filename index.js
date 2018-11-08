@@ -2,7 +2,14 @@
 
 const Hapi = require('hapi');
 const mongoose = require('mongoose');
+const Joi = require('joi');
+const Boom = require('boom');
+
 const Todo = require('./models/todo');
+const TodoSchema = Joi.object().keys({
+  name: Joi.string().required(),
+  checked: Joi.bool(),
+})
 
 const url = "mongodb://localhost:27017/tododb";
 
@@ -36,10 +43,14 @@ server.route({
   method: 'POST',
   path: '/',
   handler: (request, h) => {
-    const { name, checked } = request.payload;
+    const { error, value } = Joi.validate(request.payload, TodoSchema);
+    if (error) return Boom.boomify(error, { statusCode: 400 });
+
+    if (!value.checked) value.checked = false;
+
     const newTodo = new Todo({
-      name,
-      checked,
+      name: value.name,
+      checked: value.checked,
     });
     return newTodo.save();
   }
@@ -58,8 +69,11 @@ server.route({
   path: '/{id}',
   handler: async (request, h) => {
     const todo = await Todo.findById(request.params.id);
-    todo.name = request.payload.name;
-    todo.checked = request.payload.checked;
+    const { error, value } = Joi.validate(request.payload, TodoSchema);
+    if (error) return Boom.boomify(error, { statusCode: 400 });
+
+    todo.name = value.name;
+    todo.checked = value.checked;
     return todo.save();
   }
 })
