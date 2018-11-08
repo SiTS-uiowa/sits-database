@@ -20,9 +20,17 @@ server.route({
   method: 'GET',
   path: '/',
   handler: (request, h) => {
-    return 'Hello, world!'; // TODO: return a list of todos
+    return Todo.find();
   }
 });
+
+server.route({
+  method: 'GET',
+  path: '/unchecked',
+  handler: (request, h) => {
+    return Todo.find({checked: false});
+  }
+})
 
 server.route({
   method: 'POST',
@@ -41,15 +49,18 @@ server.route({
   method: 'GET',
   path: '/{id}',
   handler: (request, h) => {
-    // TODO: retrieve a todo item based on a unique id
+    return Todo.findById(request.params.id);
   }
 });
 
 server.route({
   method: 'PUT',
   path: '/{id}',
-  handler: (request, h) => {
-    // TODO: update a todo item based on a unique id
+  handler: async (request, h) => {
+    const todo = await Todo.findById(request.params.id);
+    todo.name = request.payload.name;
+    todo.checked = request.payload.checked;
+    return todo.save();
   }
 })
 
