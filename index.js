@@ -7,6 +7,38 @@ const server = Hapi.server({
   host: 'localhost'
 });
 
+server.route({
+  method: 'GET',
+  path: '/',
+  handler: (request, h) => {
+    return 'Hello, world!'; // TODO: return a list of todos
+  }
+});
+
+server.route({
+  method: 'POST',
+  path: '/',
+  handler: (request, h) => {
+    // TODO: create a TODO with a name and 'checked' value
+  }
+})
+
+server.route({
+  method: 'GET',
+  path: '/{id}',
+  handler: (request, h) => {
+    // TODO: retrieve a todo item based on a unique id
+  }
+});
+
+server.route({
+  method: 'PUT',
+  path: '/{id}',
+  handler: (request, h) => {
+    // TODO: update a todo item based on a unique id
+  }
+})
+
 const init = async () => {
   await server.start();
   console.log(`Server running at: ${server.info.uri}`);
